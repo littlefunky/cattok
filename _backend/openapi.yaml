@@ -1,0 +1,710 @@
+openapi: 3.0.0
+info:
+  title: CatTok API
+  version: 1.0.0
+
+servers:
+    - url: https://example.org
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: jwt
+  parameters:
+    user_id:
+      name: user_id
+      description: User ID or use alias `me` for authenticated user
+      required: true
+      in: path
+      schema:
+        type: string
+        default: me
+  responses:
+    UnexpectedError:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    UnauthorizedError:
+      description: Unauthorized error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Fail"
+          example:
+            status: fail
+            data: "Unauthorized"
+  schemas:
+    # JSend specification https://github.com/omniti-labs/jsend
+    Success:
+      type: object
+      properties:
+        status:
+          type: string
+          default: success
+        data:
+          description: Returned data
+          nullable: true
+    Fail:
+      type: object
+      properties:
+        status:
+          type: string
+          default: fail
+        data:
+          description: Failed message
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          default: error
+        message:
+          description: Error message
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        video_url:
+          type: string
+        public_date:
+          type: string
+          format: date
+        heart:
+          type: integer
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        name:
+          type: string
+        comment:
+          type: string
+        comment_date:
+          type: string
+          format: date
+
+tags:
+  - name: User
+    description: User managment
+  - name: Post
+    description: Post managment
+  - name: Comment
+    description: Manipulate comment
+
+paths:
+  /user:
+    post:
+      tags:
+        - User
+      security: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                photo:
+                  type: string
+                  format: binary
+      description: Create new user
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          jwt:
+                            type: string
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /user/{user_id}:
+    get:
+      tags:
+        - User
+      description: Get specific `User` by ID
+      parameters:
+        - $ref: "#/components/parameters/user_id"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - User
+      description: Update user
+      parameters:
+        - $ref: "#/components/parameters/user_id"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                photo:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "403":
+          description: No permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /user/{user_id}/post:
+    get:
+      tags:
+        - User
+      description: Get `Post` associated with user
+      parameters:
+        - $ref: "#/components/parameters/user_id"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Post"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /login:
+    post:
+      tags:
+        - User
+      security: []
+      description: Authenticate to CatTok
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          jwt:
+                            type: string
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /post:
+    get:
+      tags:
+        - Post
+      description: Get list of `Post`
+      security: []
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Post"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Post
+      description: Create new post
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                video:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          post_id:
+                            type: string
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /post/{post_id}:
+    get:
+      tags:
+        - Post
+      description: Get single `Post` from ID
+      security: []
+      parameters:
+        - name: post_id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Post"
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Post
+      description: Update post
+      parameters:
+        - name: post_id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                video:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          description: No permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Post
+      description: Delete post
+      parameters:
+        - name: post_id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          description: No permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /post/{post_id}/heart:
+    post:
+      tags:
+        - Post
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+      description: Give heart to a post
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /post/{post_id}/comment:
+    get:
+      tags:
+        - Post
+        - Comment
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+      description: Get list of `Comment` of post
+      security: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Comment"
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Post
+        - Comment
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+      description: Create new comment
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          comment_id:
+                            type: string
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /post/{post_id}/comment/{comment_id}:
+    get:
+      tags:
+        - Post
+        - Comment
+      security: []
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: comment_id
+          in: path
+          required: true
+          schema:
+            type: string
+      description: Get specific `Comment` by ID
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Comment"
+        "404":
+          description: Post or comment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      description: Update comment
+      tags:
+        - Post
+        - Comment
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: comment_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          description: No permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        "404":
+          description: Post or comment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Post
+        - Comment
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: comment_id
+          in: path
+          required: true
+          schema:
+            type: string
+      description: Delete comment
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          description: No permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        "404":
+          description: Post or comment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
