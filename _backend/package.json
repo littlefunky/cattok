@@ -1,0 +1,16 @@
+{
+  "name": "_backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-doc": "redoc-cli bundle --output docs.html openapi.yaml"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "redoc-cli": "^0.12.3"
+  }
+}
