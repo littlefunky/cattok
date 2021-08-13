@@ -77,6 +77,8 @@ components:
           type: string
         email:
           type: string
+        photo:
+          type: string
     Post:
       type: object
       properties:
