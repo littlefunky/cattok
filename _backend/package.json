@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-doc": "redoc-cli bundle --output docs.html openapi.yaml"
+    "build-doc": "redoc-cli bundle --output docs.html openapi.yaml",
+    "dev": "redoc-cli serve --watch openapi.yaml"
   },
   "keywords": [],
   "author": "",

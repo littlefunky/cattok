@@ -1,6 +1,7 @@
 openapi: 3.0.0
 info:
   title: CatTok API
+  description: 'In rapid-development phase, **Can be change very often.**'
   version: 1.0.0
 
 servers:
@@ -144,7 +145,7 @@ paths:
                   format: binary
       description: Create new user
       responses:
-        "200":
+        "201":
           description: Successful response
           content:
             application/json:
@@ -347,7 +348,7 @@ paths:
                   type: string
                   format: binary
       responses:
-        "200":
+        "201":
           description: Successful response
           content:
             application/json:
@@ -561,7 +562,7 @@ paths:
                   type: string
       description: Create new comment
       responses:
-        "200":
+        "201":
           description: Successful response
           content:
             application/json:
