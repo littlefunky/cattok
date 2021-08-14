@@ -17,9 +17,12 @@
     "redoc-cli": "^0.12.3"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-openapi-validator": "^4.12.15",
+    "isemail": "^3.2.0",
+    "jsonwebtoken": "^8.5.1",
     "mongodb": "^4.1.0"
   }
 }

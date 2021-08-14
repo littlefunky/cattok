@@ -1,6 +1,6 @@
 //JSend specification
 
-function responseHelper(req, res, next) {
+function responser(req, res, next) {
   const success = (data) => {
     res.json({
       status: "success",
@@ -29,4 +29,4 @@ function responseHelper(req, res, next) {
   next();
 }
 
-module.exports = { responseHelper };
+module.exports = { responser };

@@ -5,7 +5,7 @@ const User = require("./resources/user");
 
 const DB = require("./db");
 
-const { responseHelper } = require("./utils");
+const { responser } = require("./utils");
 
 const OpenApiValidator = require("express-openapi-validator");
 const express = require("express");
@@ -17,7 +17,7 @@ async function server() {
   app.use(db);
 
   app.use(express.json());
-  app.use(responseHelper);
+  app.use(responser);
   app.use(express.urlencoded({ extended: true }));
 
   app.use(
@@ -57,4 +57,4 @@ async function server() {
   });
 }
 
-server()
+server();
