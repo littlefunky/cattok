@@ -1,17 +1,25 @@
 {
   "name": "_backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "CatTok API",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-doc": "redoc-cli bundle --output docs.html openapi.yaml",
-    "dev": "redoc-cli serve --watch openapi.yaml"
+    "build:doc": "redoc-cli bundle --output docs.html openapi.yaml",
+    "dev:spec": "redoc-cli serve --watch openapi.yaml",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "redoc-cli": "^0.12.3"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-openapi-validator": "^4.12.15",
+    "mongodb": "^4.1.0"
   }
 }

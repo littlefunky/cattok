@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 
 servers:
-    - url: https://example.org
+    - url: /v1
 
 security:
   - BearerAuth: []
@@ -45,6 +45,9 @@ components:
     # JSend specification https://github.com/omniti-labs/jsend
     Success:
       type: object
+      required:
+        - status
+        - data
       properties:
         status:
           type: string
@@ -54,6 +57,9 @@ components:
           nullable: true
     Fail:
       type: object
+      required:
+        - status
+        - data
       properties:
         status:
           type: string
@@ -62,6 +68,9 @@ components:
           description: Failed message
     Error:
       type: object
+      required:
+        - status
+        - data
       properties:
         status:
           type: string
@@ -71,6 +80,11 @@ components:
           type: string
     User:
       type: object
+      required:
+        - id
+        - name
+        - email
+        - photo
       properties:
         id:
           type: string
@@ -82,6 +96,14 @@ components:
           type: string
     Post:
       type: object
+      required:
+        - id
+        - user_id
+        - title
+        - description
+        - video_url
+        - public_date
+        - heart
       properties:
         id:
           type: string
@@ -100,6 +122,12 @@ components:
           type: integer
     Comment:
       type: object
+      required:
+        - id
+        - user_id
+        - name
+        - comment
+        - comment_date
       properties:
         id:
           type: string
@@ -133,6 +161,11 @@ paths:
           multipart/form-data:
             schema:
               type: object
+              required:
+                - name
+                - email
+                - password
+                - photo
               properties:
                 name:
                   type: string
@@ -156,6 +189,8 @@ paths:
                     properties:
                       data:
                         type: object
+                        required:
+                          - jwt
                         properties:
                           jwt:
                             type: string
