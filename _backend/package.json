@@ -5,7 +5,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "build:doc": "redoc-cli bundle --output docs.html openapi.yaml",
     "dev:spec": "redoc-cli serve --watch openapi.yaml",
     "start": "node index.js"
@@ -14,13 +14,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "jest-openapi": "^0.13.0",
+    "jest": "^27.0.6",
     "redoc-cli": "^0.12.3"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
-    "express-openapi-validator": "^4.12.15",
+    "form-data": "^4.0.0",
     "isemail": "^3.2.0",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^4.1.0"

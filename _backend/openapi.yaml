@@ -194,6 +194,12 @@ paths:
                         properties:
                           jwt:
                             type: string
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
         default:
           $ref: "#/components/responses/UnexpectedError"
   /user/{user_id}:

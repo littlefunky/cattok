@@ -1,5 +1,11 @@
 //JSend specification
 
+const multer = require("multer");
+
+const upload = multer({
+  dest: process.env.UPLOAD_DEST,
+});
+
 function responser(req, res, next) {
   const success = (data) => {
     res.json({
@@ -29,4 +35,4 @@ function responser(req, res, next) {
   next();
 }
 
-module.exports = { responser };
+module.exports = { responser, upload };

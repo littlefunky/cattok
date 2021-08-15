@@ -1,20 +1,20 @@
 const { MongoClient } = require("mongodb");
 
-const url = "mongodb://localhost:27017";
+const url = process.env.MONGO_URL;
 const client = new MongoClient(url);
 
 const dbName = process.env.DB;
 
-async function connect() {
+async function middleware() {
+  console.log("Connecting to Mongo server");
   await client.connect();
+
   const db = client.db(dbName);
 
-  const middleware = (req, _, next) => {
+  return (req, _, next) => {
     req.db = db;
     next();
   };
-
-  return middleware;
 }
 
-module.exports = { client, connect };
+module.exports = { middleware };

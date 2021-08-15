@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const IsEmail = require("isemail");
 const jwt = require("jsonwebtoken");
+const { upload } = require("../utils");
 
 function signUserJwt(user_id) {
   return new Promise((resolve, reject) => {
@@ -18,20 +19,22 @@ function signUserJwt(user_id) {
 }
 
 module.exports = function (api) {
-  api.post("/user", async (req, res, next) => {
+  api.post("/user", upload.single("photo"), async (req, res, next) => {
     const { email, name, password } = req.body;
 
-    bcypt.hash(password, 10, async (err, hash) => {
+    if (!email || !name || !password || !req.file) {
+      return res.status(400).fail("missing info");
+    }
+
+    bcrypt.hash(password, 10, async (err, hash) => {
       if (err) {
         res.status(500);
         return res.error(err);
       }
 
       try {
-        if (!IsEmail.validate(req.body.email)) {
-          res.status(400);
-          return res.fail({ email: "malformed" });
-        }
+        if (!IsEmail.validate(req.body.email))
+          return res.status(400).fail({ email: "malformed" });
       } catch (e) {
         return next(e);
       }
@@ -44,7 +47,7 @@ module.exports = function (api) {
 
       const token = await signUserJwt(result.insertedId);
 
-      res.success({
+      res.status(201).success({
         jwt: token,
       });
     });
@@ -70,7 +73,6 @@ module.exports = function (api) {
     next();
   }
 
-  //To be implement
   api.get("/user/:user_id", isMe, (req, res) => {
     const result = req.db
       .collection("user")
@@ -84,7 +86,7 @@ module.exports = function (api) {
     res.success(result);
   });
 
-  api.put("/user/:user_id", isMe, async (req, res) => {
+  api.put("/user/:user_id", upload.single("photo"), isMe, async (req, res) => {
     const result = await req.db.collection("user").updateOne(
       {
         _id: req.params.user_id,
@@ -114,10 +116,8 @@ module.exports = function (api) {
     const { email, password } = req.body;
 
     try {
-      if (!IsEmail.validate(email)) {
-        res.status(400);
-        return res.fail({ email: "malformed" });
-      }
+      if (!IsEmail.validate(email))
+        return res.status(400).fail({ email: "malformed" });
     } catch (e) {
       return next(e);
     }
@@ -126,22 +126,14 @@ module.exports = function (api) {
       email,
     });
 
-    if (!result) {
-      res.status(401);
-      return res.fail({ email: "no email found" });
-    }
+    if (!result) return res.status(400).fail({ email: "no email found" });
 
     const hash = result.password;
     bcrypt.compare(password, hash, async (err, result) => {
-      if (err) {
-        res.status(500);
-        return res.error(err);
-      }
+      if (err) return res.status(500).error(err);
 
-      if (!result) {
-        res.status(401);
-        return res.fail({ password: "password incorrect" });
-      }
+      if (!result)
+        return res.status(401).fail({ password: "password incorrect" });
 
       const token = await signUserJwt(result._id);
       res.success({
