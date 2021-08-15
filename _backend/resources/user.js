@@ -1,39 +1,51 @@
-const bcypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 const IsEmail = require("isemail");
-const jwt = require("jwt");
+const jwt = require("jsonwebtoken");
 
-function signUserJwt(user_id, callback) {
-  jwt.sign(
-    {
-      user_id,
-    },
-    process.env.SECRET,
-    callback
-  );
+function signUserJwt(user_id) {
+  return new Promise((resolve, reject) => {
+    jwt.sign(
+      {
+        user_id,
+      },
+      process.env.SECRET,
+      (err, token) => {
+        if (err) reject(err);
+        resolve(token);
+      }
+    );
+  });
 }
 
 module.exports = function (api) {
   api.post("/user", async (req, res, next) => {
-    bcypt.hash(req.body.password, 10, (err, hash) => {
+    const { email, name, password } = req.body;
+
+    bcypt.hash(password, 10, async (err, hash) => {
       if (err) {
         res.status(500);
         return res.error(err);
       }
 
+      try {
+        if (!IsEmail.validate(req.body.email)) {
+          res.status(400);
+          return res.fail({ email: "malformed" });
+        }
+      } catch (e) {
+        return next(e);
+      }
+
       const result = await req.db.collection("user").insertOne({
-        name: req.body.name,
-        email: req.body.email,
+        name: name,
+        email: email,
         password: hash,
       });
 
-      signUserJwt(result.insertedId, (err, token) => {
-        if (err) {
-          res.status(500);
-          return res.error(err);
-        }
-        res.success({
-          jwt: token,
-        });
+      const token = await signUserJwt(result.insertedId);
+
+      res.success({
+        jwt: token,
       });
     });
   });
@@ -71,7 +83,8 @@ module.exports = function (api) {
 
     res.success(result);
   });
-  api.put("/user/:user_id", isMe, (req, res) => {
+
+  api.put("/user/:user_id", isMe, async (req, res) => {
     const result = await req.db.collection("user").updateOne(
       {
         _id: req.params.user_id,
@@ -86,7 +99,8 @@ module.exports = function (api) {
       return res.success();
     }
   });
-  api.get("/user/:user_id/post", isMe, (req, res, next) => {
+
+  api.get("/user/:user_id/post", isMe, async (req, res, next) => {
     const result = await req.db.collection("post").findMany({
       user_id: req.params.user_id,
     });
@@ -95,12 +109,17 @@ module.exports = function (api) {
       return res.success(result);
     }
   });
+
   api.post("/login", async (req, res, next) => {
     const { email, password } = req.body;
 
-    if (!IsEmail.validate(email)) {
-      res.status(400);
-      return res.fail({ email: "malformed" });
+    try {
+      if (!IsEmail.validate(email)) {
+        res.status(400);
+        return res.fail({ email: "malformed" });
+      }
+    } catch (e) {
+      return next(e);
     }
 
     const result = await req.db.collection("user").findOne({
@@ -113,20 +132,20 @@ module.exports = function (api) {
     }
 
     const hash = result.password;
-    bcrypt.compare(password, hash, (err, result) => {
+    bcrypt.compare(password, hash, async (err, result) => {
       if (err) {
+        res.status(500);
+        return res.error(err);
+      }
+
+      if (!result) {
         res.status(401);
         return res.fail({ password: "password incorrect" });
       }
 
-      signUserJwt(result._id, (err, token) => {
-        if (err) {
-          res.status(500);
-          return res.error(err);
-        }
-        res.success({
-          jwt: token,
-        });
+      const token = await signUserJwt(result._id);
+      res.success({
+        jwt: token,
       });
     });
   });
