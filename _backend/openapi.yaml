@@ -195,7 +195,13 @@ paths:
                           jwt:
                             type: string
         "400":
-          description: Bad request
+          description: Malformed or missing required data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        "409":
+          description: Email already in use
           content:
             application/json:
               schema:
@@ -227,6 +233,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Fail"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
         default:
           $ref: "#/components/responses/UnexpectedError"
     put:
@@ -256,6 +264,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Success"
+        "400":
+          description: Malformed or missing required data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
         "403":
           description: No permission
           content:
@@ -264,6 +278,12 @@ paths:
                 $ref: "#/components/schemas/Fail"
         "404":
           description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        "409":
+          description: Email already in use
           content:
             application/json:
               schema:
@@ -335,6 +355,14 @@ paths:
                         properties:
                           jwt:
                             type: string
+        "400":
+          description: Malformed or missing required data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
         default:
           $ref: "#/components/responses/UnexpectedError"
   /post:
@@ -403,6 +431,12 @@ paths:
                         properties:
                           post_id:
                             type: string
+        "400":
+          description: Malformed or missing required data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
         default:
@@ -470,6 +504,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Success"
+        "400":
+          description: Malformed or missing required data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
         "403":
@@ -617,6 +657,12 @@ paths:
                         properties:
                           comment_id:
                             type: string
+        "400":
+          description: Malformed or missing required data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
         "404":
@@ -697,6 +743,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Success"
+        "400":
+          description: Malformed or missing required data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
         "403":

@@ -24,9 +24,10 @@ async function server() {
 
   app.use("/v1", api);
 
-  app.use((err, req, res, next) => {
-    //Error handling
-  });
+  // app.use((err, req, res, next) => {
+  //   // Error handling
+  //   res.error(req)
+  // });
 
   app.listen(3000, () => {
     console.log("Listening on 3000");

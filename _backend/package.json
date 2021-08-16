@@ -14,8 +14,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "jest-openapi": "^0.13.0",
     "jest": "^27.0.6",
+    "jest-openapi": "^0.13.0",
     "redoc-cli": "^0.12.3"
   },
   "dependencies": {
@@ -26,6 +26,8 @@
     "form-data": "^4.0.0",
     "isemail": "^3.2.0",
     "jsonwebtoken": "^8.5.1",
-    "mongodb": "^4.1.0"
+    "mongodb": "^4.1.0",
+    "multer": "^1.4.3",
+    "uuid": "^8.3.2"
   }
 }
