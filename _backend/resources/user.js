@@ -118,7 +118,7 @@ module.exports = function (api) {
       id: result._id,
       name: result.name,
       email: result.email,
-      // photo: result.photo,
+      photo: result.photo,
     });
   });
 
