@@ -1,5 +1,5 @@
 {
-  "name": "_backend",
+  "name": "api",
   "version": "1.0.0",
   "description": "CatTok API",
   "main": "index.js",
