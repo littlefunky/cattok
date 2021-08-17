@@ -2,13 +2,14 @@
   "name": "api",
   "version": "1.0.0",
   "description": "CatTok API",
-  "main": "index.js",
+  "main": "server.js",
   "private": true,
   "scripts": {
     "test": "jest",
     "build:doc": "redoc-cli bundle --output docs.html openapi.yaml",
-    "dev:spec": "redoc-cli serve --watch openapi.yaml",
-    "start": "node index.js"
+    "dev:openapi": "redoc-cli serve --watch openapi.yaml",
+    "dev:api": "nodemon .",
+    "start": "node ."
   },
   "keywords": [],
   "author": "",
@@ -16,7 +17,10 @@
   "devDependencies": {
     "jest": "^27.0.6",
     "jest-openapi": "^0.13.0",
-    "redoc-cli": "^0.12.3"
+    "nodemon": "^2.0.12",
+    "redoc-cli": "^0.12.3",
+    "supertest": "^6.1.5",
+    "supertest-prefix": "^1.0.2"
   },
   "dependencies": {
     "axios": "^0.21.1",

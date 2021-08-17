@@ -4,35 +4,18 @@ const axios = require("axios").default;
 const path = require("path");
 const fs = require("fs");
 const FormData = require("form-data");
-const { db, client } = require("../db");
+const { client } = require("../db");
 
 const jestOpenAPI = require("jest-openapi");
-
 jestOpenAPI(path.resolve(__dirname, "../openapi.yaml"));
-
-function resetDb() {
-  return Promise.all([
-    db.collection("user").deleteMany({}),
-    db.collection("post").deleteMany({}),
-  ]);
-}
-
-beforeAll(async () => {
-  await client.connect();
-  return resetDb();
-});
-
-afterAll(async () => {
-  await resetDb();
-  return client.close();
-});
 
 let jwt;
 let user_id;
 
 const NAME = "Thanawat Yodnil";
 const EMAIL = "thanawat@example.com";
-const PHOTO = () => fs.createReadStream("./photo.jpg");
+const PHOTO = () => fs.createReadStream("./examples/photo.jpg");
+const PHOTO2 = () => fs.createReadStream("./examples/photo2.jpg");
 const PASSWORD = "example";
 
 describe("User", () => {
@@ -121,7 +104,7 @@ describe("User", () => {
 
     test("use 'me' alias but not authenticated", async () => {
       const res = await axios.get("http://localhost:3000/v1/user/me", {
-        validateStatus: status => status === 401
+        validateStatus: (status) => status === 401,
       });
 
       expect(res.status).toEqual(401);
@@ -142,30 +125,38 @@ describe("User", () => {
     test("update user", async () => {
       const form = new FormData();
       form.append("name", "Little Boy");
-      form.append("photo", fs.createReadStream("./photo2.jpg"));
+      form.append("photo", PHOTO2());
 
-      const res = await axios.put("http://localhost:3000/v1/user/" + user_id, form, {
-        headers: {
-          ...form.getHeaders(),
-          Authorization: "Bearer " + jwt
+      const res = await axios.put(
+        "http://localhost:3000/v1/user/" + user_id,
+        form,
+        {
+          headers: {
+            ...form.getHeaders(),
+            Authorization: "Bearer " + jwt,
+          },
         }
-      });
+      );
 
       expect(res.status).toEqual(200);
       expect(res).toSatisfyApiSpec();
     });
-    
+
     test("malformed email", async () => {
       const form = new FormData();
       form.append("email", "maleformed.com");
 
-      const res = await axios.put("http://localhost:3000/v1/user/" + user_id, form, {
-        validateStatus: status => status === 400,
-        headers: {
-          ...form.getHeaders(),
-          Authorization: "Bearer " + jwt
+      const res = await axios.put(
+        "http://localhost:3000/v1/user/" + user_id,
+        form,
+        {
+          validateStatus: (status) => status === 400,
+          headers: {
+            ...form.getHeaders(),
+            Authorization: "Bearer " + jwt,
+          },
         }
-      });
+      );
 
       expect(res.status).toEqual(400);
       expect(res).toSatisfyApiSpec();
@@ -175,13 +166,16 @@ describe("User", () => {
       const form = new FormData();
       form.append("name", "Little Boy");
       form.append("email", "littleboy@example.com");
-      form.append("photo", fs.createReadStream("./photo2.jpg"));
+      form.append("photo", PHOTO2());
 
-      const res = await axios.put("http://localhost:3000/v1/user/" + user_id, form,
+      const res = await axios.put(
+        "http://localhost:3000/v1/user/" + user_id,
+        form,
         {
           headers: form.getHeaders(),
-          validateStatus: status => status === 401
-      });
+          validateStatus: (status) => status === 401,
+        }
+      );
 
       expect(res.status).toEqual(401);
       expect(res).toSatisfyApiSpec();
@@ -191,16 +185,21 @@ describe("User", () => {
       const form = new FormData();
       form.append("name", "Little Guy");
       form.append("email", "anotherguy@example.com");
-      form.append("photo", fs.createReadStream("./photo2.jpg"));
+      form.append("photo", PHOTO2());
 
-      const res = await axios.put("http://localhost:3000/v1/user/" + user_id, form,
+      const res = await axios.put(
+        "http://localhost:3000/v1/user/" + user_id,
+        form,
         {
           headers: {
             ...form.getHeaders(),
-            Authorization: "Bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjExYTQ4YTU3ZWY4YjUyMTdjNjBiYWI2IiwiaWF0IjoxNjI5MTEyMDA5fQ.9zCCCi71XfCFJcr5_KqK_rSiBRaEvbVaYlJveKLmYOI"
+            Authorization:
+              "Bearer " +
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjExYTQ4YTU3ZWY4YjUyMTdjNjBiYWI2IiwiaWF0IjoxNjI5MTEyMDA5fQ.9zCCCi71XfCFJcr5_KqK_rSiBRaEvbVaYlJveKLmYOI",
           },
-          validateStatus: status => status === 403
-      });
+          validateStatus: (status) => status === 403,
+        }
+      );
 
       expect(res.status).toEqual(403);
       expect(res).toSatisfyApiSpec();
