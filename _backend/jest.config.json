@@ -1,0 +1,8 @@
+{
+    "globalSetup": "<rootDir>/globalSetup.js",
+    "globalTeardown": "<rootDir>/globalTeardown.js",
+    "setupFilesAfterEnv": [
+        "<rootDir>/setupFile.js"
+      ]
+}
+  
