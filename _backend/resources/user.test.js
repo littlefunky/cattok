@@ -18,15 +18,9 @@ let user_id;
 let app;
 
 beforeAll(async () => {
-  await client.connect();
   const db = client.db(process.env.DB);
-
-  db.dropDatabase();
-
   app = await createApp(db);
 });
-
-afterAll(async () => await client.close());
 
 describe("POST /v1/user", () => {
   test("create user with correct data", async () => {

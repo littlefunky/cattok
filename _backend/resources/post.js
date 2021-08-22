@@ -207,7 +207,7 @@ module.exports = function (api) {
 
       const post = await req.db
         .collection("post")
-        .findOne(ObjectId(req.params.post_id), { comment: 1 });
+        .findOne(ObjectId(req.params.post_id), { projection: { comment: 1 } });
       if (!post) return res.status(404).fail("Post not found");
 
       const comments = post.comment.map((comment) => ({
