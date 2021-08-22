@@ -1,288 +1,227 @@
 require("dotenv").config();
 
-const axios = require("axios").default;
 const path = require("path");
-const fs = require("fs");
-const FormData = require("form-data");
-const { client } = require("../db");
+
+const prefix = require("supertest-prefix").default("/v1");
+const request = require("supertest");
+
+const { client } = require("../db.js");
+const createApp = require("../app");
+
+const { User } = require("../examples/examples");
 
 const jestOpenAPI = require("jest-openapi");
 jestOpenAPI(path.resolve(__dirname, "../openapi.yaml"));
 
 let jwt;
 let user_id;
+let app;
 
-const NAME = "Thanawat Yodnil";
-const EMAIL = "thanawat@example.com";
-const PHOTO = () => fs.createReadStream("./examples/photo.jpg");
-const PHOTO2 = () => fs.createReadStream("./examples/photo2.jpg");
-const PASSWORD = "example";
+beforeAll(async () => {
+  await client.connect();
+  const db = client.db(process.env.DB);
 
-describe("User", () => {
-  describe("POST /v1/user", () => {
-    test("create user with correct data", async () => {
-      const form = new FormData();
-      form.append("name", NAME);
-      form.append("email", EMAIL);
-      form.append("password", PASSWORD);
-      form.append("photo", PHOTO());
+  db.dropDatabase();
 
-      const res = await axios.post("http://localhost:3000/v1/user", form, {
-        headers: form.getHeaders(),
-      });
+  app = await createApp(db);
+});
 
-      expect(res.status).toEqual(201);
-      expect(res).toSatisfyApiSpec();
+afterAll(async () => await client.close());
 
-      jwt = res.data.data.jwt;
-    });
+describe("POST /v1/user", () => {
+  test("create user with correct data", async () => {
+    const res = await request(app)
+      .post("/user")
+      .use(prefix)
+      .field("name", User[0].name)
+      .field("email", User[0].email)
+      .field("password", User[0].password)
+      .attach("photo", User[0].photo);
 
-    test("email already in use", async () => {
-      const form = new FormData();
-      form.append("name", NAME);
-      form.append("email", EMAIL);
-      form.append("password", PASSWORD);
-      form.append("photo", PHOTO());
+    expect(res.status).toEqual(201);
+    expect(res).toSatisfyApiSpec();
 
-      const res = await axios.post("http://localhost:3000/v1/user", form, {
-        headers: form.getHeaders(),
-        validateStatus: (status) => status === 409,
-      });
-
-      expect(res.status).toEqual(409);
-      expect(res).toSatisfyApiSpec();
-    });
-
-    test("malformed email", async () => {
-      const form = new FormData();
-      form.append("name", NAME);
-      //Malformed email
-      form.append("email", "malformed.com");
-      form.append("password", PASSWORD);
-      form.append("photo", PHOTO());
-
-      const res = await axios.post("http://localhost:3000/v1/user", form, {
-        headers: form.getHeaders(),
-        validateStatus: (status) => status === 400,
-      });
-
-      expect(res.status).toEqual(400);
-      expect(res).toSatisfyApiSpec();
-    });
-
-    test("missing required form data", async () => {
-      const form = new FormData();
-      form.append("name", NAME);
-      form.append("email", EMAIL);
-
-      const res = await axios.post("http://localhost:3000/v1/user", form, {
-        headers: form.getHeaders(),
-        validateStatus: (status) => status === 400,
-      });
-
-      expect(res.status).toEqual(400);
-      expect(res).toSatisfyApiSpec();
-    });
+    jwt = res.body.data.jwt;
   });
 
-  describe("GET /v1/user/:user_id", () => {
-    test("use 'me' alias to get authenticated user", async () => {
-      const res = await axios.get("http://localhost:3000/v1/user/me", {
-        headers: {
-          Authorization: "Bearer " + jwt,
-        },
-      });
+  test("email already in use", async () => {
+    const res = await request(app)
+      .post("/user")
+      .use(prefix)
+      .field("name", User[0].name)
+      .field("email", User[0].email)
+      .field("password", User[0].password)
+      .attach("photo", User[0].photo);
 
-      expect(res.status).toEqual(200);
-      expect(res).toSatisfyApiSpec();
-
-      expect(res.data.data.name).toEqual(NAME);
-      expect(res.data.data.email).toEqual(EMAIL);
-
-      user_id = res.data.data.id;
-    });
-
-    test("use 'me' alias but not authenticated", async () => {
-      const res = await axios.get("http://localhost:3000/v1/user/me", {
-        validateStatus: (status) => status === 401,
-      });
-
-      expect(res.status).toEqual(401);
-      expect(res).toSatisfyApiSpec();
-    });
-
-    test("get user from ID", async () => {
-      const res = await axios.get("http://localhost:3000/v1/user/" + user_id);
-
-      expect(res.status).toEqual(200);
-      expect(res).toSatisfyApiSpec();
-
-      expect(res.data.data.name).toEqual(NAME);
-      expect(res.data.data.email).toEqual(EMAIL);
-    });
+    expect(res.status).toEqual(409);
+    expect(res).toSatisfyApiSpec();
   });
-  describe("PUT /v1/user/:user_id", () => {
-    test("update user", async () => {
-      const form = new FormData();
-      form.append("name", "Little Boy");
-      form.append("photo", PHOTO2());
 
-      const res = await axios.put(
-        "http://localhost:3000/v1/user/" + user_id,
-        form,
-        {
-          headers: {
-            ...form.getHeaders(),
-            Authorization: "Bearer " + jwt,
-          },
-        }
-      );
+  test("malformed email", async () => {
+    const res = await request(app)
+      .post("/user")
+      .use(prefix)
+      .field("name", User[0].name)
+      .field("email", "malformed.com")
+      .field("password", User[0].password)
+      .attach("photo", User[0].photo);
 
-      expect(res.status).toEqual(200);
-      expect(res).toSatisfyApiSpec();
-    });
-
-    test("malformed email", async () => {
-      const form = new FormData();
-      form.append("email", "maleformed.com");
-
-      const res = await axios.put(
-        "http://localhost:3000/v1/user/" + user_id,
-        form,
-        {
-          validateStatus: (status) => status === 400,
-          headers: {
-            ...form.getHeaders(),
-            Authorization: "Bearer " + jwt,
-          },
-        }
-      );
-
-      expect(res.status).toEqual(400);
-      expect(res).toSatisfyApiSpec();
-    });
-
-    test("not authenticated", async () => {
-      const form = new FormData();
-      form.append("name", "Little Boy");
-      form.append("email", "littleboy@example.com");
-      form.append("photo", PHOTO2());
-
-      const res = await axios.put(
-        "http://localhost:3000/v1/user/" + user_id,
-        form,
-        {
-          headers: form.getHeaders(),
-          validateStatus: (status) => status === 401,
-        }
-      );
-
-      expect(res.status).toEqual(401);
-      expect(res).toSatisfyApiSpec();
-    });
-
-    test("no permission", async () => {
-      const form = new FormData();
-      form.append("name", "Little Guy");
-      form.append("email", "anotherguy@example.com");
-      form.append("photo", PHOTO2());
-
-      const res = await axios.put(
-        "http://localhost:3000/v1/user/" + user_id,
-        form,
-        {
-          headers: {
-            ...form.getHeaders(),
-            Authorization:
-              "Bearer " +
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjExYTQ4YTU3ZWY4YjUyMTdjNjBiYWI2IiwiaWF0IjoxNjI5MTEyMDA5fQ.9zCCCi71XfCFJcr5_KqK_rSiBRaEvbVaYlJveKLmYOI",
-          },
-          validateStatus: (status) => status === 403,
-        }
-      );
-
-      expect(res.status).toEqual(403);
-      expect(res).toSatisfyApiSpec();
-    });
+    expect(res.status).toEqual(400);
+    expect(res).toSatisfyApiSpec();
   });
-  describe("GET /v1/user/:user_id/post", () => {
-    test("get post associated with user", async () => {
-      const res = await axios.get(
-        "http://localhost:3000/v1/user/" + user_id + "/post"
-      );
 
-      expect(res.status).toEqual(200);
-      expect(res).toSatisfyApiSpec();
-    });
+  test("missing required form data", async () => {
+    const res = await request(app)
+      .post("/user")
+      .use(prefix)
+      .field("name", User[0].name)
+      .field("email", "malformed.com");
+
+    expect(res.status).toEqual(400);
+    expect(res).toSatisfyApiSpec();
   });
-  describe("POST /v1/login", () => {
-    test("correctly login", async () => {
-      const res = await axios.post("http://localhost:3000/v1/login", {
-        email: EMAIL,
-        password: PASSWORD,
-      });
+});
 
-      expect(res.status).toEqual(200);
-      expect(res).toSatisfyApiSpec();
-    });
-    test("login with unregistered email", async () => {
-      const res = await axios.post(
-        "http://localhost:3000/v1/login",
-        {
-          email: "kongthap@example.com",
-          password: PASSWORD,
-        },
-        {
-          validateStatus: (status) => status === 401,
-        }
+describe("GET /v1/user/:user_id", () => {
+  test("use 'me' alias to get authenticated user", async () => {
+    const res = await request(app)
+      .get("/user/me")
+      .use(prefix)
+      .set("Authorization", "Bearer " + jwt);
+
+    expect(res.status).toEqual(200);
+    expect(res).toSatisfyApiSpec();
+
+    expect(res.body.data.name).toEqual(User[0].name);
+    expect(res.body.data.email).toEqual(User[0].email);
+
+    user_id = res.body.data.id;
+  });
+
+  test("use 'me' alias but not authenticated", async () => {
+    const res = await request(app).get("/user/me").use(prefix);
+
+    expect(res.status).toEqual(401);
+    expect(res).toSatisfyApiSpec();
+  });
+
+  test("get user from ID", async () => {
+    const res = await request(app)
+      .get("/user/" + user_id)
+      .use(prefix);
+
+    expect(res.status).toEqual(200);
+    expect(res).toSatisfyApiSpec();
+
+    expect(res.body.data.name).toEqual(User[0].name);
+    expect(res.body.data.email).toEqual(User[0].email);
+  });
+});
+describe("PUT /v1/user/:user_id", () => {
+  test("update user", async () => {
+    const res = await request(app)
+      .put("/user/" + user_id)
+      .use(prefix)
+      .field("name", "Little Boy")
+      .attach("photo", User[1].photo)
+      .set("Authorization", "Bearer " + jwt);
+
+    expect(res.status).toEqual(200);
+    expect(res).toSatisfyApiSpec();
+  });
+
+  test("malformed email", async () => {
+    const res = await request(app)
+      .put("/user/" + user_id)
+      .use(prefix)
+      .field("email", "malformed.com")
+      .attach("photo", User[1].photo)
+      .set("Authorization", "Bearer " + jwt);
+
+    expect(res.status).toEqual(400);
+    expect(res).toSatisfyApiSpec();
+  });
+
+  test("not authenticated", async () => {
+    const res = await request(app)
+      .put("/user/" + user_id)
+      .use(prefix)
+      .field("name", "Little Boy")
+      .attach("photo", User[1].photo);
+
+    expect(res.status).toEqual(401);
+    expect(res).toSatisfyApiSpec();
+  });
+
+  test("no permission", async () => {
+    const res = await request(app)
+      .put("/user/" + user_id)
+      .use(prefix)
+      .field("name", "Little Boy")
+      .attach("photo", User[1].photo)
+      .set(
+        "Authorization",
+        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjExYTQ4YTU3ZWY4YjUyMTdjNjBiYWI2IiwiaWF0IjoxNjI5MTEyMDA5fQ.9zCCCi71XfCFJcr5_KqK_rSiBRaEvbVaYlJveKLmYOI"
       );
 
-      expect(res.status).toEqual(401);
-      expect(res).toSatisfyApiSpec();
-    });
-    test("login with incorrect password", async () => {
-      const res = await axios.post(
-        "http://localhost:3000/v1/login",
-        {
-          email: "thanawat@example.com",
-          password: PASSWORD + "s",
-        },
-        {
-          validateStatus: (status) => status === 401,
-        }
-      );
+    expect(res.status).toEqual(403);
+    expect(res).toSatisfyApiSpec();
+  });
+});
+describe("GET /v1/user/:user_id/post", () => {
+  test("get post associated with user", async () => {
+    const res = await request(app)
+      .get("/user/" + user_id + "/post")
+      .use(prefix);
 
-      expect(res.status).toEqual(401);
-      expect(res).toSatisfyApiSpec();
-    });
-    test("malformed email", async () => {
-      const res = await axios.post(
-        "http://localhost:3000/v1/login",
-        {
-          email: "maleformed.com",
-          password: PASSWORD,
-        },
-        {
-          validateStatus: (status) => status === 400,
-        }
-      );
+    expect(res.status).toEqual(200);
+    expect(res).toSatisfyApiSpec();
+  });
+});
+describe("POST /v1/login", () => {
+  test("correctly login", async () => {
+    const res = await request(app)
+      .post("/login")
+      .use(prefix)
+      .send({ email: User[0].email, password: User[0].password });
 
-      expect(res.status).toEqual(400);
-      expect(res).toSatisfyApiSpec();
-    });
-    test("missing required credentials", async () => {
-      const res = await axios.post(
-        "http://localhost:3000/v1/login",
-        {
-          email: EMAIL,
-        },
-        {
-          validateStatus: (status) => status === 400,
-        }
-      );
+    expect(res.status).toEqual(200);
+    expect(res).toSatisfyApiSpec();
+  });
+  test("login with unregistered email", async () => {
+    const res = await request(app)
+      .post("/login")
+      .use(prefix)
+      .send({ email: User[1].email, password: User[0].password });
 
-      expect(res.status).toEqual(400);
-      expect(res).toSatisfyApiSpec();
-    });
+    expect(res.status).toEqual(401);
+    expect(res).toSatisfyApiSpec();
+  });
+  test("login with incorrect password", async () => {
+    const res = await request(app)
+      .post("/login")
+      .use(prefix)
+      .send({ email: User[0].email, password: User[0].password + "s" });
+
+    expect(res.status).toEqual(401);
+    expect(res).toSatisfyApiSpec();
+  });
+  test("malformed email", async () => {
+    const res = await request(app)
+      .post("/login")
+      .use(prefix)
+      .send({ email: "malformed.com", password: User[0].password });
+
+    expect(res.status).toEqual(400);
+    expect(res).toSatisfyApiSpec();
+  });
+  test("missing required credentials", async () => {
+    const res = await request(app)
+      .post("/login")
+      .use(prefix)
+      .send({ email: User[0].email });
+
+    expect(res.status).toEqual(400);
+    expect(res).toSatisfyApiSpec();
   });
 });

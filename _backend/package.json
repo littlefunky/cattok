@@ -27,6 +27,7 @@
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "express-validator": "^6.12.1",
     "form-data": "^4.0.0",
     "isemail": "^3.2.0",
     "jsonwebtoken": "^8.5.1",

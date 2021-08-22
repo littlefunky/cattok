@@ -1,11 +1,16 @@
 openapi: 3.0.0
 info:
-  title: CatTok API
-  description: 'In rapid-development phase, **Can be change very often.**'
+  title: CatTok
+  description: >
+    Made for **CatTok** frontend client, GitHub [littlefuny/cattok](https://github.com/littlefunky/cattok)
+
+    <iframe src="https://giphy.com/embed/JuFwy0zPzd6jC" width="480" height="380" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/computer-computers-caturday-JuFwy0zPzd6jC">via GIPHY</a></p>
+      
+    This project was made for educational purpose only 🚀.
   version: 1.0.0
 
 servers:
-    - url: /v1
+  - url: /v1
 
 security:
   - BearerAuth: []
@@ -117,7 +122,7 @@ components:
           type: string
         public_date:
           type: string
-          format: date
+          format: date-time
         heart:
           type: integer
     Comment:
@@ -125,7 +130,6 @@ components:
       required:
         - id
         - user_id
-        - name
         - comment
         - comment_date
       properties:
@@ -133,13 +137,11 @@ components:
           type: string
         user_id:
           type: string
-        name:
-          type: string
         comment:
           type: string
         comment_date:
           type: string
-          format: date
+          format: date-time
 
 tags:
   - name: User
@@ -335,6 +337,9 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - email
+                - password
               properties:
                 email:
                   type: string
@@ -396,6 +401,12 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/Post"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fail"
         default:
           $ref: "#/components/responses/UnexpectedError"
     post:
@@ -408,6 +419,10 @@ paths:
           multipart/form-data:
             schema:
               type: object
+              required:
+                - title
+                - description
+                - video
               properties:
                 title:
                   type: string
@@ -638,6 +653,8 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - comment
               properties:
                 comment:
                   type: string
@@ -733,6 +750,8 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - comment
               properties:
                 comment:
                   type: string

@@ -13,11 +13,10 @@ async function app(db) {
     next();
   };
 
-  //Helper middleware
+  app.use(responser);
   app.use(databaseMiddleware);
   app.use(auth);
   app.use(express.json());
-  app.use(responser);
   app.use(express.urlencoded({ extended: false }));
 
   const api = express.Router();
@@ -26,14 +25,9 @@ async function app(db) {
   Post(api);
 
   app.use("/v1", api);
+  app.use("/assets", express.static(process.env.UPLOAD_DEST));
 
-  //Error handler
   app.use(error);
-
-  // app.use((err, req, res, next) => {
-  //   // Error handling
-  //   res.error(req)
-  // });
 
   return app;
 }
