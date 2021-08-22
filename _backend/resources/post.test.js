@@ -20,15 +20,9 @@ let createdPost;
 let createdComment;
 
 beforeAll(async () => {
-  await client.connect();
   const db = client.db(process.env.DB);
-
-  db.dropDatabase();
-
   app = await createApp(db);
 });
-
-afterAll(async () => await client.close());
 
 describe("POST /post", () => {
   test("Create post", async () => {
