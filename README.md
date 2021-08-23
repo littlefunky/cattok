@@ -1,4 +1,4 @@
 # CatTok API
-[![Node.js CI](https://github.com/littlefunky/cattok/actions/workflows/node.js.yml/badge.svg)](https://github.com/littlefunky/cattok/actions/workflows/node.js.yml)
+[![API Test](https://github.com/littlefunky/cattok/actions/workflows/api.js.yml/badge.svg)](https://github.com/littlefunky/cattok/actions/workflows/api.js.yml)
 
 More detail coming soon... 🚀
