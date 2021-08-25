@@ -2,6 +2,8 @@
 
 [![API Test](https://github.com/littlefunky/cattok/actions/workflows/api.js.yml/badge.svg)](https://github.com/littlefunky/cattok/actions/workflows/api.js.yml)
 
+[Cat Programming](https://media.giphy.com/media/aNqEFrYVnsS52/giphy.gif?cid=ecf05e47pgmtxf00n47yfz1csphws8pdtxp8xkqp064rq470&rid=giphy.gif&ct=g)
+
 ## What is this
 
 `CatTok` is where you can find and share video about cats.
