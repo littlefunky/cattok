@@ -20,3 +20,20 @@ We separate logic to 2 part which live within separated folder at root
 
 - \_frontend - UI made with React
 - \_backend - API Backend
+
+# How to setup
+
+Clone this repo
+
+```bash
+git clone https://github.com/littlefunky/cattok.git && cd cattok
+```
+
+Install dependencies and start server
+
+```bash
+npm install
+npm start
+```
+
+Now, go visit https://localhost:3000 you should see CatTok's homepage 🎉
