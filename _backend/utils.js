@@ -40,8 +40,8 @@ const { v4: uuid } = require("uuid");
 
 const storage = multer.diskStorage({
   destination: process.env.UPLOAD_DEST,
-  filename(req, file, cb) {
-    cb(null, uuid() + "_" + file.originalname);
+  filename(_, file, cb) {
+    cb(null, uuid() + path.extname(file.originalname));
   },
 });
 
