@@ -71,7 +71,7 @@ module.exports = function (api) {
             : {}
         )
         .project({ comment: 0 })
-        .limit(req.limit || 0)
+        .limit(parseInt(req.query.limit) || 0)
         .toArray();
 
       const posts = result.map((post) => ({

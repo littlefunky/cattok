@@ -18,6 +18,11 @@ async function app(db) {
   app.use(auth);
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
+  app.use((req, res, next) => {
+    //TODO explicit set host
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    next();
+  });
 
   const api = express.Router();
 
