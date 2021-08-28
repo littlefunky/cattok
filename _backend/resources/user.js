@@ -110,7 +110,7 @@ module.exports = function (api) {
           name: req.body.name,
           email: req.body.email,
           password: hash,
-          photo: assetsPath(req.file.filename),
+          photo: req.file.filename,
         });
 
         const token = await signUserJwt(result.insertedId);
