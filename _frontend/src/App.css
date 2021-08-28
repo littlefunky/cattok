@@ -1,0 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Kanit&family=Prompt:wght@200;400&family=Roboto:wght@300;400&display=swap");
+
+* {
+  font-family: "Kanit", sans-serif;
+}
+
+html,
+body {
+  background: #1a1a1a;
+}
