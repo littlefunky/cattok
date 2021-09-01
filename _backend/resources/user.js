@@ -4,6 +4,7 @@ const { photo, isAuth, assetsPath } = require("../utils");
 const { ObjectId } = require("mongodb");
 const { body, validationResult } = require("express-validator");
 const isMongoId = require("validator").default.isMongoId;
+const { MulterError } = require("multer");
 
 function uploadHandler(req, res, next) {
   photo.single("photo")(req, res, (err) => {

@@ -20,7 +20,8 @@ async function app(db) {
   app.use(express.urlencoded({ extended: false }));
   app.use((req, res, next) => {
     //TODO explicit set host
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Access-Control-Allow-Headers", "content-type");
     next();
   });
 
