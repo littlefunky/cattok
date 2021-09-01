@@ -87,12 +87,15 @@ module.exports = function (api) {
     body("name").notEmpty(),
     body("password").notEmpty(),
     async (req, res, next) => {
+      let errors = [];
+
       if (!req.file)
-        return res
-          .status(400)
-          .fail({ location: "file", msg: "required photo", param: "photo" });
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) return res.status(400).fail(errors.array());
+        errors = [{ location: "file", msg: "required photo", param: "photo" }];
+
+      const validate = validationResult(req);
+      if (!validate.isEmpty()) errors = [...errors, ...validate.array()];
+
+      if (errors.length > 0) return res.status(400).fail(errors);
 
       bcrypt.hash(req.body.password, 10, async (err, hash) => {
         if (err) {

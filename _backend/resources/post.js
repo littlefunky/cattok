@@ -29,13 +29,15 @@ module.exports = function (api) {
     body("title").notEmpty(),
     body("description").notEmpty(),
     async (req, res) => {
-      if (!req.file)
-        return res
-          .status(400)
-          .fail([{ location: "file", msg: "video required", param: "video" }]);
+      let errors = [];
 
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) return res.status(400).fail(errors.array());
+      if (!req.file)
+        errors = [{ location: "file", msg: "video required", param: "video" }];
+
+      const validate = validationResult(req);
+      if (!validate.isEmpty()) errors = [...errors, ...validate.array()];
+
+      if (errors.length > 0) return res.status(400).fail(errors);
 
       const result = await req.db.collection("post").insertOne({
         title: req.body.title,
