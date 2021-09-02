@@ -21,7 +21,7 @@ async function app(db) {
   app.use((req, res, next) => {
     //TODO explicit set host
     res.set("Access-Control-Allow-Origin", "*");
-    res.set("Access-Control-Allow-Headers", "content-type");
+    res.set("Access-Control-Allow-Headers", "content-type, authorization");
     next();
   });
 
