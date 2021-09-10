@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { photo, isAuth, assetsPath } = require("../utils");
 const { ObjectId } = require("mongodb");
-const { body, validationResult } = require("express-validator");
+const { body, param, validationResult } = require("express-validator");
 const isMongoId = require("validator").default.isMongoId;
 const { MulterError } = require("multer");
 
@@ -221,4 +221,20 @@ module.exports = function (api) {
       });
     }
   );
+
+  api.get("/search/user/:name", param("name").notEmpty(), async (req, res) => {
+    const validate = validationResult(req);
+    if (!validate.isEmpty()) {
+      return res.status(400).fail(validate.array());
+    }
+
+    const regex = new RegExp(req.params.name, "i");
+
+    const users = await req.db
+      .collection("user")
+      .find({ name: regex })
+      .toArray();
+
+    res.success({ users });
+  });
 };

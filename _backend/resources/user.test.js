@@ -76,6 +76,20 @@ describe("POST /v1/user", () => {
   });
 });
 
+describe("GET /search/user/:name", () => {
+  test("Search for user with name Thanawat Yodnil", async () => {
+    const res = await request(app)
+      .get("/search/user/" + User[0].name)
+      .use(prefix);
+
+    expect(res.status).toEqual(200);
+    expect(res).toSatisfyApiSpec();
+
+    expect(res.body.data.users.length).toEqual(1);
+    expect(res.body.data.users[0].name).toEqual(User[0].name);
+  });
+});
+
 describe("GET /v1/user/:user_id", () => {
   test("use 'me' alias to get authenticated user", async () => {
     const res = await request(app)

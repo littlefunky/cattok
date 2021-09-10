@@ -152,6 +152,28 @@ tags:
     description: Manipulate comment
 
 paths:
+  /search/user/{name}:
+    get:
+      description: Search for user
+      security: []
+      parameters:
+        - name: name
+          description: Name of user
+          required: true
+          in: path
+          schema:
+            type: string
+      tags:
+        - User
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
   /user:
     post:
       tags:
