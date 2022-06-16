@@ -30,6 +30,7 @@ const Header = ({ direction = "row" }) => {
     event.preventDefault();
 
     const user_id = "611c0e0823f600ae6225affa";
+    //TODO : Make file Dotenv
     const URL = `http://localhost:3000/v1/user/${user_id}`;
 
     await fetch(URL)
