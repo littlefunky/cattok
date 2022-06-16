@@ -5,6 +5,7 @@ import Footer from "../footer/footer.js";
 const Home = () => {
   return (
     <>
+      //TODO : add pages
       <Header />
       <Content />
       <Footer />
