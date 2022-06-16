@@ -61,7 +61,7 @@ const Content = () => {
   function Windows() {
     const { data, error, isLoading } = useQuery("getPosts", fetchPosts);
 
-    if (isLoading) return "Loading...";
+    if (isLoading) return "Loading..";
     if (error) return "An error has occurred" + error.message;
 
     console.log(data);
@@ -89,6 +89,7 @@ const Content = () => {
               <FeedItemSize>
                 <FontAwesomeIcon icon={faHeart} />
               </FeedItemSize>
+              //TODO : like
               <SizeFontItenFeed>{"12.5k"}</SizeFontItenFeed>
               <FeedItemSize>
                 <FontAwesomeIcon icon={faCommentDots} />
